@@ -1,0 +1,70 @@
+digraph {
+	graph [bb="0,0,727,335",
+		label="vouloir(moi, faire) & faire(moi, structure) & nouveau(structure) & présent(vouloir) & singulier(structure) & indéfini(structure)
+\
+vouloir(moi, faire) & faire(moi, structure) & nouveau(structure) & présent(vouloir) & singulier(structure) & indéfini(structure)",
+		lheight=0.42,
+		lp="363.5,19",
+		lwidth=9.88,
+		margin=0
+	];
+	node [label="\N",
+		shape=plaintext
+	];
+	edge [arrowhead=vee];
+	‘vouloir’	 [fontcolor=red4,
+		height=0.5,
+		label=‘vouloir’,
+		pos="511.75,230",
+		width=0.91667];
+	‘moi’	 [height=0.5,
+		pos="514.75,56",
+		width=0.75];
+	‘vouloir’ -> ‘moi’	 [label=1,
+		lp="520.75,143",
+		pos="e,515.71,74.215 513.42,211.86 514.62,197.96 516.12,178.28 516.75,161 517.69,135.09 516.97,105.56 516.14,84.435"];
+	‘faire’	 [height=0.5,
+		label=‘faire’,
+		pos="480.75,143",
+		width=0.75];
+	‘vouloir’ -> ‘faire’	 [label=2,
+		lp="501.75,186.5",
+		pos="e,487.16,161 505.33,211.97 501.09,200.08 495.45,184.25 490.64,170.76"];
+	‘faire’ -> ‘moi’	 [label=1,
+		lp="503.75,99.5",
+		pos="e,507.71,74.003 487.79,124.97 492.49,112.96 498.75,96.94 504.06,83.365"];
+	‘structure’	 [height=0.5,
+		pos="385.75,56",
+		width=1.0417];
+	‘faire’ -> ‘structure’	 [label=2,
+		lp="442.75,99.5",
+		pos="e,405.41,74.003 461.07,124.97 447.18,112.26 428.4,95.06 413.07,81.018"];
+	‘nouveau’	 [height=0.5,
+		label=‘nouveau’,
+		pos="305.75,143",
+		width=1.0139];
+	‘nouveau’ -> ‘structure’	 [label=1,
+		lp="353.75,99.5",
+		pos="e,369.2,74.003 322.33,124.97 333.91,112.38 349.54,95.375 362.39,81.406"];
+	‘présent’	 [height=0.5,
+		label=‘présent’,
+		pos="511.75,317",
+		width=0.91667];
+	‘présent’ -> ‘vouloir’	 [label=1,
+		lp="515.75,273.5",
+		pos="e,511.75,248 511.75,298.97 511.75,287.19 511.75,271.56 511.75,258.16"];
+	‘singulier’	 [height=0.5,
+		label=‘singulier’,
+		pos="397.75,143",
+		width=1.0417];
+	‘singulier’ -> ‘structure’	 [label=1,
+		lp="395.75,99.5",
+		pos="e,388.23,74.003 395.26,124.97 393.64,113.19 391.48,97.561 389.63,84.158"];
+	‘indéfini’	 [height=0.5,
+		label=‘indéfini’,
+		pos="216.75,143",
+		width=0.95833];
+	‘indéfini’ -> ‘structure’	 [label=1,
+		lp="314.75,99.5",
+		pos="e,350.61,74.091 251.36,125.18 277.39,111.79 313.25,93.321 341.39,78.837"];
+}

@@ -31,14 +31,15 @@ def logform(graph):
     logform = ' & '.join([f"{handle_pred(handle, pred)}({', '.join(args)})" for (handle, pred, args) in graph])
     return re.sub(r'\(\)', '', logform)
 
-def graph(graph, quotes=True, spaces=True, label=None, engine='dot', format='pdf'):
-    dot = Digraph(engine=engine, format=format)
+def graphviz(graph, quotes=True, spaces=True, label=None, dominance=True, engine='dot'):
+    dot = Digraph(engine=engine, format='gv')
     dot.attr('graph', margin='0')
     if label:
         dot.attr('graph', label=label)
     dot.attr('node', shape='plaintext')
     dot.attr('edge', arrowhead='vee')
-    dominant = True
+    if dominance:
+        dominant = True
     for (handle, pred, args) in graph:
         if quotes:
             handle = f"‘{handle}’"
@@ -58,5 +59,8 @@ def graph(graph, quotes=True, spaces=True, label=None, engine='dot', format='pdf
             dot.node(arg)
             dot.edge(handle, arg, label=str(i))
         dominant = False
-    print(dot.source)
-    return dot.pipe()#.decode('utf-8')
+    return dot
+
+def layout(dot, format='pdf'):
+    dot.format = format
+    return dot.pipe()

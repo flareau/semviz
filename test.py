@@ -1,13 +1,15 @@
 import semviz
 
-def test(filename, quotes=True, spaces=True, format='pdf'):
+FORMATS = ['gv', 'pdf', 'jpg']
+
+def test(filename, quotes=True, spaces=True, dominance=True):
     with open(filename) as f:
         for i, line in enumerate([line.strip() for line in f.readlines() if line.strip()], 1):
-            semr = semviz.parse(line)
-            # label = None
-            # label = logform(semr)
-            label = semviz.logform(semr)+'\n'+line
-            with open('.'.join([filename, str(i), format]), 'wb') as f:
-                f.write(semviz.graph(semr, label=label, quotes=quotes, spaces=spaces, format=format))
+            graph = semviz.parse(line)
+            label = semviz.logform(graph)+'\n'+line
+            dot = semviz.graphviz(graph, label=label, quotes=quotes, spaces=spaces, dominance=dominance)
+            for format in FORMATS:
+                with open('.'.join([filename, str(i), format]), 'wb') as f:
+                    f.write(semviz.layout(dot, format=format))
 
-test(filename='tests/test1.txt', format='pdf')
+test(filename='tests/test1.txt')

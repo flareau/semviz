@@ -1,0 +1,31 @@
+digraph {
+	graph [bb="0,0,126,161",
+		label="peur(X, Y)
+peur(X,Y)",
+		lheight=0.42,
+		lp="63,19",
+		lwidth=0.86,
+		margin=0
+	];
+	node [label="\N",
+		shape=plaintext
+	];
+	edge [arrowhead=vee];
+	‘peur’	 [fontcolor=red4,
+		height=0.5,
+		label=‘peur’,
+		pos="63,143",
+		width=0.75];
+	‘X’	 [height=0.5,
+		pos="27,56",
+		width=0.75];
+	‘peur’ -> ‘X’	 [label=1,
+		lp="52,99.5",
+		pos="e,34.45,74.003 55.541,124.97 50.569,112.96 43.941,96.94 38.323,83.365"];
+	‘Y’	 [height=0.5,
+		pos="99,56",
+		width=0.75];
+	‘peur’ -> ‘Y’	 [label=2,
+		lp="87,99.5",
+		pos="e,91.55,74.003 70.459,124.97 75.431,112.96 82.059,96.94 87.677,83.365"];
+}

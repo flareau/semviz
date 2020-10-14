@@ -2,7 +2,8 @@ import re
 from graphviz import Digraph
 
 def parse(text):
-    nodes = [n.strip() for n in text.split('&')]
+    right = text.split('=')[-1] # keep only right-hand side of equation (if applicable)
+    nodes = [n.strip() for n in right.split('&')]
     graph = []
     regex = r"^((\w+)\s*:\s*)?([\w'#]+)(\s*\((.+)\))?$"
     for node in nodes:

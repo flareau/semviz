@@ -17,6 +17,8 @@ def parse(text):
             raise Exception(f"Can't parse: {node}")
         if args:
             args = [a.strip() for a in args.split(',')]
+            if None in [re.match(r"^[\w'#]+$", a) for a in args]: # If an arg doesn't match the format
+                raise Exception(f"Can't parse: {node}")
         else:
             args = []
         graph.append((handle.strip(), pred.strip(), args))

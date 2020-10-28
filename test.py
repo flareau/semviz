@@ -1,15 +1,17 @@
-import semviz
+from semr import SemR
 
-FORMATS = ['gv', 'pdf', 'jpg']
+FORMATS = ['gv', 'pdf']
+INDIR = 'tests/'
+OUTDIR = 'tests/out/'
 
 def test(filename, quotes=True, spaces=True, dominance=True):
-    with open(filename) as f:
+    with open(INDIR+filename) as f:
         for i, line in enumerate([line.strip() for line in f.readlines() if line.strip()], 1):
-            graph = semviz.parse(line)
-            label = semviz.logform(graph)+'\n'+line
-            dot = semviz.graphviz(graph, label=label, quotes=quotes, spaces=spaces, dominance=dominance)
+            semr = SemR(line)
+            label = str(semr)
             for format in FORMATS:
-                with open('.'.join([filename, str(i), format]), 'wb') as f:
-                    f.write(semviz.layout(dot, format=format))
+                with open('.'.join([OUTDIR+filename, str(i), format]), 'wb') as f:
+                    f.write(semr.graph(label=label, quotes=quotes, spaces=spaces, dominance=dominance, format=format))
 
-test(filename='tests/test1.txt')
+test(filename='test1.txt')
+# test(filename='test2.txt')

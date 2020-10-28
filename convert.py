@@ -1,4 +1,4 @@
-import semviz
+from semr import SemR
 from flask import Flask, request, render_template, Markup, Response
 
 app = Flask(__name__)
@@ -12,22 +12,23 @@ def form_post():
     formula = request.form['formula']
     format = request.form['format']
     try:
-        graph = semviz.parse(formula)
+        formula = formula.split('|')[0]  # ignore after |
+        formula = formula.split('=')[-1] # ignore before =
+        semr = SemR(formula)
     except:
         message = "Il y a une erreur dans la formule."
         return render_template('error.html', message=message)
     try:
-        clean = semviz.logform(graph)
-        dot = semviz.graphviz(graph)
+        clean = str(semr)
         if format == 'print':
-            svg = Markup(semviz.layout(dot, format='svg').decode('utf-8'))
+            svg = Markup(semr.graph(format='svg').decode('utf-8'))
             result = render_template('result.html', formula=clean, svg=svg)
         elif format == 'dot':
-            result = Response(dot.source, mimetype='text/plain')
+            result = Response(semr.graphviz().source, mimetype='text/plain')
         elif format == 'pdf':
-            result = Response(semviz.layout(dot, format='pdf'), mimetype='application/pdf')
+            result = Response(semr.graph(format='pdf'), mimetype='application/pdf')
         elif format == 'jpg':
-            result = Response(semviz.layout(dot, format='jpg'), mimetype='image/jpeg')
+            result = Response(semr.graph(format='jpg'), mimetype='image/jpeg')
         else:
             raise Exception()
     except:

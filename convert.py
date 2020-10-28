@@ -12,8 +12,9 @@ def form_post():
     formula = request.form['formula']
     format = request.form['format']
     try:
-        formula = formula.split('|')[0]  # ignore after |
-        formula = formula.split('=')[-1] # ignore before =
+        formula = formula.split('//')[0]  # ignore everything after //
+        formula = formula.split('|')[0]  # ignore everything after |
+        formula = formula.split('=')[-1] # ignore everything before =
         semr = SemR(formula)
     except:
         message = "Il y a une erreur dans la formule."

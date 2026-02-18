@@ -4,6 +4,10 @@ import { SemR } from "./semr.js";
 
 const form = document.querySelector("#convert-form");
 const formulaInput = document.querySelector("#formula");
+const dominanceInput = document.querySelector("#opt-dominance");
+const spacesInput = document.querySelector("#opt-spaces");
+const quotesInput = document.querySelector("#opt-quotes");
+const showLexnumInput = document.querySelector("#opt-lexnum");
 const errorBox = document.querySelector("#error");
 const normalizedBox = document.querySelector("#normalized");
 const graphBox = document.querySelector("#graph");
@@ -52,6 +56,15 @@ function sanitizeFormula(input) {
   const withoutComment = input.split("//")[0];
   const withoutPipe = withoutComment.split("|")[0];
   return withoutPipe.split("=").at(-1);
+}
+
+function graphOptions() {
+  return {
+    dominance: Boolean(dominanceInput?.checked),
+    spaces: Boolean(spacesInput?.checked),
+    quotes: Boolean(quotesInput?.checked),
+    showLexnum: Boolean(showLexnumInput?.checked),
+  };
 }
 
 function setDownloadsEnabled(enabled) {
@@ -160,6 +173,18 @@ downloadButtons.forEach((button) => {
 
 void loadInstructions();
 
+[dominanceInput, spacesInput, quotesInput, showLexnumInput].forEach((input) => {
+  if (!input) {
+    return;
+  }
+  input.addEventListener("change", () => {
+    if (!formulaInput.value.trim()) {
+      return;
+    }
+    form.requestSubmit();
+  });
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
@@ -178,7 +203,7 @@ form.addEventListener("submit", async (event) => {
   let clean;
   try {
     clean = semr.toString();
-    dot = semr.graphviz();
+    dot = semr.graphviz(graphOptions());
   } catch {
     showError("Erreur dans la génération du graphe.");
     return;

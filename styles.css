@@ -124,6 +124,37 @@ textarea {
   max-width: 100%;
 }
 
+.render-options {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.render-options legend {
+  padding: 0 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.render-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.render-option-input {
+  width: auto;
+  margin: 0;
+}
+
 code,
 .code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

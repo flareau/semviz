@@ -125,7 +125,7 @@ class SemR {
     return this.#quoteId(value);
   }
 
-  graphviz({ quotes = true, spaces = true, label = null, dominance = true } = {}) {
+  graphviz({ quotes = true, spaces = true, label = null, dominance = true, showLexnum = true, hideLexnum = undefined } = {}) {
     const lines = [
       "digraph {",
       "  graph [margin=0];",
@@ -157,6 +157,10 @@ class SemR {
       let dominant = true;
       for (const [handle, rawPred, args] of nodes) {
         let pred = rawPred;
+        const shouldShowLexnum = hideLexnum === undefined ? showLexnum : !hideLexnum;
+        if (!shouldShowLexnum) {
+          pred = pred.replace(/#.+$/u, "");
+        }
         if (spaces) {
           pred = pred.replace(/_/g, " ").trim();
         }

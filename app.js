@@ -8,6 +8,7 @@ const dominanceInput = document.querySelector("#opt-dominance");
 const spacesInput = document.querySelector("#opt-spaces");
 const quotesInput = document.querySelector("#opt-quotes");
 const showLexnumInput = document.querySelector("#opt-lexnum");
+const copyNormalizedButton = document.querySelector("#copy-normalized");
 const errorBox = document.querySelector("#error");
 const normalizedBox = document.querySelector("#normalized");
 const graphBox = document.querySelector("#graph");
@@ -85,6 +86,27 @@ function download(filename, mimeType, content) {
   link.remove();
   // Delay cleanup so stricter browsers can resolve the download navigation.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function copyNormalizedFormula() {
+  const text = normalizedBox.textContent ?? "";
+  if (!text.trim()) {
+    return;
+  }
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const fallback = document.createElement("textarea");
+  fallback.value = text;
+  fallback.setAttribute("readonly", "");
+  fallback.style.position = "fixed";
+  fallback.style.opacity = "0";
+  document.body.append(fallback);
+  fallback.select();
+  document.execCommand("copy");
+  fallback.remove();
 }
 
 function svgDimensions(svg) {
@@ -170,6 +192,16 @@ downloadButtons.forEach((button) => {
     }
   });
 });
+
+if (copyNormalizedButton) {
+  copyNormalizedButton.addEventListener("click", async () => {
+    try {
+      await copyNormalizedFormula();
+    } catch {
+      showError("Impossible de copier la formule.");
+    }
+  });
+}
 
 void loadInstructions();
 

@@ -1,5 +1,4 @@
 import { Graphviz } from "https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@2.20.0/+esm";
-import { jsPDF } from "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked@15.0.6/lib/marked.esm.js";
 import { SemR } from "./semr.js";
 
@@ -67,10 +66,12 @@ function download(filename, mimeType, content) {
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.style.display = "none";
   document.body.append(link);
-  link.click();
+  link.dispatchEvent(new MouseEvent("click"));
   link.remove();
-  URL.revokeObjectURL(url);
+  // Delay cleanup so stricter browsers can resolve the download navigation.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function svgDimensions(svg) {
@@ -124,14 +125,6 @@ async function svgToPngBlob(svg) {
   }
 }
 
-function blobToDataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
 
 async function downloadPng() {
   const blob = await svgToPngBlob(lastSvg);
@@ -139,23 +132,11 @@ async function downloadPng() {
   download("graph.png", "image/png", buffer);
 }
 
-async function downloadPdf() {
-  const pngBlob = await svgToPngBlob(lastSvg);
-  const pngDataUrl = await blobToDataUrl(pngBlob);
-  const { width, height } = svgDimensions(lastSvg);
-  const pdf = new jsPDF({
-    orientation: width >= height ? "landscape" : "portrait",
-    unit: "pt",
-    format: [width, height],
-    compress: true,
-  });
-  pdf.addImage(pngDataUrl, "PNG", 0, 0, width, height);
-  pdf.save("graph.pdf");
-}
 
 function downloadDot() {
   download("graph.dot", "text/plain;charset=utf-8", lastDot);
 }
+
 
 downloadButtons.forEach((button) => {
   button.addEventListener("click", async () => {
@@ -166,10 +147,6 @@ downloadButtons.forEach((button) => {
       const format = button.dataset.format;
       if (format === "png") {
         await downloadPng();
-        return;
-      }
-      if (format === "pdf") {
-        await downloadPdf();
         return;
       }
       if (format === "dot") {

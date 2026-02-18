@@ -1,0 +1,258 @@
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --ink: #0b113a;
+  --muted: #2c355f;
+  --accent: #0057ac;
+  --accent-dark: #0b113a;
+  --error: #962e2e;
+  --border: #c8d6e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Figtree", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.layout {
+  width: 100%;
+  padding: 2rem 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(280px, 1fr) minmax(560px, 2fr);
+}
+
+.page-head {
+  grid-column: 1 / -1;
+  margin-bottom: 0.2rem;
+}
+
+.page-head h1 {
+  font-size: 2rem;
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+
+.page-head p {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(11, 17, 58, 0.06);
+  min-width: 0;
+}
+
+h1,
+h2 {
+  margin: 0 0 0.75rem;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.panel h2 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+p {
+  margin: 0 0 1rem;
+  font-size: 0.98rem;
+  color: var(--muted);
+}
+
+ul {
+  margin: 0 0 0.9rem;
+  padding-left: 1.2rem;
+}
+
+li {
+  margin-bottom: 0.45rem;
+  color: var(--muted);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.95em;
+  background: #edf3fb;
+  border-radius: 6px;
+  padding: 0.05rem 0.3rem;
+}
+
+form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+label {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+#convert-form label[for="formula"] {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+textarea,
+button {
+  width: 100%;
+  font: inherit;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 0.7rem 0.8rem;
+}
+
+textarea {
+  resize: vertical;
+  max-width: 100%;
+}
+
+code,
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.primary-btn {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.primary-btn:hover {
+  background: #00478c;
+}
+
+.error {
+  margin: 0 0 0.75rem;
+  color: var(--error);
+  font-weight: 700;
+}
+
+.code {
+  min-height: 2.2rem;
+  max-height: 240px;
+  overflow: auto;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #f7faff;
+  border: 1px solid #d7e3f2;
+  padding: 0.7rem;
+  border-radius: 10px;
+}
+
+.graph {
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 240px;
+  padding: 0.4rem;
+}
+
+.graph svg {
+  width: 100%;
+  height: auto;
+}
+
+.instructions {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.instructions h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.instructions h3 {
+  margin: 0.8rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.intro {
+  margin-bottom: 0.7rem;
+}
+
+.instructions ul ul {
+  margin-top: 0.45rem;
+  margin-bottom: 0.2rem;
+}
+
+.instructions-toggle {
+  margin-top: 1rem;
+}
+
+.instructions-toggle summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.download-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.download-btn {
+  min-width: 3rem;
+  height: 2.2rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.download-btn:hover:not(:disabled) {
+  background: #edf3fb;
+  border-color: #b4c9e4;
+}
+
+.download-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

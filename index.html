@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Semviz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="page-head">
+        <h1>Semviz</h1>
+        <p>Convertisseur de formule logique en graphe sémantique.</p>
+      </header>
+      <section class="panel input-panel">
+        <form id="convert-form">
+          <label for="formula">Formule à convertir</label>
+          <textarea id="formula" name="formula" rows="6" required></textarea>
+          <button type="submit" class="primary-btn">Convertir</button>
+        </form>
+        <details class="instructions-toggle">
+          <summary>Afficher les instructions</summary>
+          <section class="instructions">
+            <div id="instructions-content">Chargement des instructions…</div>
+          </section>
+        </details>
+      </section>
+
+      <section class="panel output-panel">
+        <p id="error" class="error" hidden></p>
+
+        <h2>Formule normalisée</h2>
+        <pre id="normalized" class="code"></pre>
+
+        <div class="section-head">
+          <h2>Graphe</h2>
+          <div class="download-actions">
+            <button type="button" class="download-btn" data-format="png" title="Télécharger PNG" disabled>
+              PNG
+            </button>
+            <button type="button" class="download-btn" data-format="pdf" title="Télécharger PDF" disabled>
+              PDF
+            </button>
+            <button type="button" class="download-btn" data-format="dot" title="Télécharger DOT" disabled>
+              DOT
+            </button>
+          </div>
+        </div>
+        <div id="graph" class="graph"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

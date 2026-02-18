@@ -1,3 +1,7 @@
+const NODE_COLOR = "#000000";
+const EDGE_COLOR = "#4a4a4a";
+const SUBGRAPH_COLOR = "#6a83fe";
+
 class SemR {
   constructor(text) {
     this.subgraphs = this.#parse(text);
@@ -130,8 +134,8 @@ class SemR {
       "digraph {",
       "  graph [margin=0];",
       "  graph [splines=true];",
-      "  node [shape=plaintext];",
-      "  edge [arrowhead=vee];",
+      `  node [shape=plaintext, color="${NODE_COLOR}", fontcolor="${NODE_COLOR}"];`,
+      `  edge [arrowhead=vee, color="${EDGE_COLOR}", fontcolor="${EDGE_COLOR}"];`,
     ];
 
     if (label) {
@@ -152,7 +156,7 @@ class SemR {
       const sgLabel = name ? `<<b>${name}</b>>` : '""';
 
       lines.push(`  subgraph ${this.#quoteId(sgName)} {`);
-      lines.push("    graph [style=rounded, ranksep=0, nodesep=0, label=" + sgLabel + "]; ");
+      lines.push(`    graph [style=rounded, ranksep=0, nodesep=0, labeljust=l, color="${SUBGRAPH_COLOR}", fontcolor="${SUBGRAPH_COLOR}", label=${sgLabel}]; `);
 
       let dominant = true;
       for (const [handle, rawPred, args] of nodes) {

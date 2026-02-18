@@ -124,6 +124,10 @@ textarea {
   max-width: 100%;
 }
 
+#formula {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .render-options {
   margin: 0;
   padding: 0.6rem 0.75rem;

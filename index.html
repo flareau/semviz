@@ -16,14 +16,14 @@
     <main class="layout">
       <header class="page-head">
         <h1>Semviz</h1>
-        <p>Convertisseur de formule logique en graphe sémantique.</p>
+        <p>Éditeur de représentation sémantique.</p>
       </header>
       <section class="panel input-panel">
         <form id="convert-form">
           <label for="formula">Formule à convertir</label>
           <textarea id="formula" name="formula" rows="6" required></textarea>
           <fieldset class="render-options">
-            <legend>Affichage</legend>
+            <legend>Options d’affichage</legend>
             <label class="render-option"><input id="opt-dominance" class="render-option-input" type="checkbox" checked /> Dominance</label>
             <label class="render-option"><input id="opt-spaces" class="render-option-input" type="checkbox" checked /> Espaces</label>
             <label class="render-option"><input id="opt-quotes" class="render-option-input" type="checkbox" checked /> Guillemets</label>
@@ -32,7 +32,7 @@
           <button type="submit" class="primary-btn">Convertir</button>
         </form>
         <details class="instructions-toggle">
-          <summary>Afficher les instructions</summary>
+          <summary>Instructions</summary>
           <section class="instructions">
             <div id="instructions-content">Chargement des instructions…</div>
           </section>

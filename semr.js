@@ -1,5 +1,5 @@
 class SemR {
-  constructor(text = "") {
+  constructor(text) {
     this.subgraphs = this.#parse(text);
   }
 
@@ -10,13 +10,10 @@ class SemR {
 
   #parse(text) {
     const cleaned = this.#clean(text);
-    if (!cleaned) {
-      return [{ name: null, nodes: [] }];
-    }
     if (cleaned.startsWith("[")) {
       return this.#parseSubgraphs(cleaned);
     }
-    return [{ name: null, nodes: this.#parseSubgraph(cleaned) }];
+    return new Map([[null, this.#parseSubgraph(cleaned)]]);
   }
 
   #parseSubgraphs(text) {
@@ -26,7 +23,11 @@ class SemR {
     }
 
     const matches = [...text.matchAll(/\[([\p{L}\p{M}\p{N}_</>\-]+) ([^\]]+)\]/gu)];
-    return matches.map((m) => ({ name: m[1], nodes: this.#parseSubgraph(m[2]) }));
+    const subgraphs = new Map();
+    for (const m of matches) {
+      subgraphs.set(m[1], this.#parseSubgraph(m[2]));
+    }
+    return subgraphs;
   }
 
   #parseSubgraph(text) {
@@ -103,7 +104,7 @@ class SemR {
 
   toString() {
     const chunks = [];
-    for (const { name, nodes } of this.subgraphs) {
+    for (const [name, nodes] of this.subgraphs.entries()) {
       const serializedNodes = nodes.map(
         ([handle, pred, args]) => `${this.#handlePred(handle, pred)}(${args.join(",")})`,
       );
@@ -138,13 +139,15 @@ class SemR {
     }
 
     const sgIndex = new Map();
-    for (const { name, nodes } of this.subgraphs) {
+    const rootNodes = [];
+    const rootEdges = [];
+    for (const [name, nodes] of this.subgraphs.entries()) {
       for (const [handle] of nodes) {
         sgIndex.set(handle, name);
       }
     }
 
-    for (const { name, nodes } of this.subgraphs) {
+    for (const [name, nodes] of this.subgraphs.entries()) {
       const sgName = name ? `cluster_${name}` : "cluster_0";
       const sgLabel = name ? `<<b>${name}</b>>` : '""';
 
@@ -162,19 +165,18 @@ class SemR {
         if (spaces) {
           pred = pred.replace(/_/g, " ").trim();
         }
-        if (dominance && dominant) {
-          pred = `<u>${pred}</u>`;
-          pred = pred.replace("<sub>", "</u><sub>");
-          pred = pred.replace("</sub></u>", "</sub>’");
-        }
         if (quotes) {
           pred = `‘${pred}’`;
+        }
+        if (dominance && dominant) {
+          pred = `<b>${pred}</b>`;
         }
         const htmlLabel = `<${pred}>`;
         lines.push(`    ${this.#quoteId(handle)} [label=${htmlLabel}];`);
 
         for (let i = 0; i < args.length; i += 1) {
           const arg = args[i];
+          rootNodes.push(`  ${this.#quoteId(arg)};`);
           if (!sgIndex.has(arg) || sgIndex.get(arg) === name) {
             lines.push(`    ${this.#quoteId(arg)};`);
           }
@@ -183,8 +185,8 @@ class SemR {
           if (sgIndex.has(arg) && sgIndex.get(arg) !== name) {
             constraint = "false";
           }
-          lines.push(
-            `    ${this.#quoteId(handle)} -> ${this.#quoteId(arg)} [label=${this.#quoteDotString(String(i + 1))}, constraint=${constraint}];`,
+          rootEdges.push(
+            `  ${this.#quoteId(handle)} -> ${this.#quoteId(arg)} [label=${this.#quoteDotString(String(i + 1))}, constraint=${constraint}];`,
           );
         }
 
@@ -194,6 +196,8 @@ class SemR {
       lines.push("  }");
     }
 
+    lines.push(...rootNodes);
+    lines.push(...rootEdges);
     lines.push("}");
     return lines.join("\n");
   }

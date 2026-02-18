@@ -125,7 +125,7 @@ class SemR {
     return this.#quoteId(value);
   }
 
-  graphviz({ quotes = true, spaces = true, prettynum = true, label = null, dominance = true } = {}) {
+  graphviz({ quotes = true, spaces = true, label = null, dominance = true } = {}) {
     const lines = [
       "digraph {",
       "  graph [margin=0];",
@@ -157,11 +157,6 @@ class SemR {
       let dominant = true;
       for (const [handle, rawPred, args] of nodes) {
         let pred = rawPred;
-
-        if (prettynum && pred.split("#").length === 2) {
-          const [lemma, num] = pred.split("#");
-          pred = `${lemma}<sub><font point-size=\"8\">${num}</font></sub>`;
-        }
         if (spaces) {
           pred = pred.replace(/_/g, " ").trim();
         }

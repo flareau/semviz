@@ -163,7 +163,7 @@ function renderGraph(graphData) {
           color: "#4e64ce",
           "font-size": "14pt",
           shape: "round-rectangle",
-          padding: "28px",
+          padding: "14px",
         },
       },
       {
@@ -183,38 +183,72 @@ function renderGraph(graphData) {
           label: "data(label)",
           "font-family": "Helvetica, Arial, sans-serif",
           color: "#4a4a4a",
-          "font-size": "8pt",
+          "font-size": "10pt",
           "text-margin-y": -8,
         },
       },
+      {
+        selector: "edge.vertical-edge",
+        style: {
+          "text-margin-x": 8,
+          "text-margin-y": 0,
+        },
+      },
     ],
-    layout: {
-      name: "dagre",
-      nodeDimensionsIncludeLabels: true,
-      animate: false,
-      rankDir: "TB",
-      ranker: "network-simplex",
-      spacingFactor: 0.85,
-      nodeSep: 24,
-      edgeSep: 10,
-      rankSep: 42,
-      fit: true,
-      padding: 36,
-    },
   });
 
-  cy.one("layoutstop", () => {
-    const bounds = cy.elements().boundingBox();
-    if (!Number.isFinite(bounds.h) || bounds.h <= 0) {
+  function updateEdgeLabelOffsets() {
+    if (!cy || cy.destroyed()) {
+      return;
+    }
+    cy.edges().forEach((edge) => {
+      const sourcePos = edge.source().position();
+      const targetPos = edge.target().position();
+      const dx = Math.abs(targetPos.x - sourcePos.x);
+      const dy = Math.abs(targetPos.y - sourcePos.y);
+      const isVertical = dy > 0 && dx / dy < 0.40;
+      edge.toggleClass("vertical-edge", isVertical);
+    });
+  }
+
+  function adjustGraphViewport() {
+    if (!cy || cy.destroyed()) {
+      return;
+    }
+    const bounds = cy.elements().boundingBox({ includeLabels: true, includeOverlays: false });
+    if (!Number.isFinite(bounds.h) || bounds.h <= 0 || !Number.isFinite(bounds.w) || bounds.w <= 0) {
       return;
     }
 
-    // Expand the viewport with the graph so text stays readable instead of over-shrinking.
-    const targetHeight = Math.max(420, Math.ceil(bounds.h + 120));
+    // Keep natural graph scale and grow the panel to avoid shrinking labels into an unreadable fit.
+    const targetHeight = Math.max(420, Math.ceil(bounds.h + 140));
     graphBox.style.height = `${targetHeight}px`;
     cy.resize();
-    cy.fit(cy.elements(), 48);
+    cy.zoom(1);
+    cy.pan({
+      x: Math.max(24, -bounds.x1 + 24),
+      y: Math.max(24, -bounds.y1 + 24),
+    });
+    updateEdgeLabelOffsets();
+  }
+
+  const layout = cy.layout({
+    name: "dagre",
+    nodeDimensionsIncludeLabels: true,
+    animate: false,
+    rankDir: "TB",
+    ranker: "network-simplex",
+    spacingFactor: 0.85,
+    nodeSep: 24,
+    edgeSep: 10,
+    rankSep: 42,
+    fit: false,
+    padding: 36,
   });
+  layout.on("layoutstop", adjustGraphViewport);
+  layout.run();
+  requestAnimationFrame(() => requestAnimationFrame(adjustGraphViewport));
+  cy.on("dragfree", "node", updateEdgeLabelOffsets);
 }
 
 async function downloadPng() {

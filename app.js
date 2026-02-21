@@ -239,11 +239,11 @@ function renderGraph(graphData) {
     rankDir: "TB",
     ranker: "network-simplex",
     spacingFactor: 0.85,
-    nodeSep: 24,
+    nodeSep: 30,
     edgeSep: 10,
-    rankSep: 42,
+    rankSep: 30,
     fit: false,
-    padding: 36,
+    padding: 6,
   });
   layout.on("layoutstop", adjustGraphViewport);
   layout.run();

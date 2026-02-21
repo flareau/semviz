@@ -1,9 +1,9 @@
 import cytoscape from "https://cdn.jsdelivr.net/npm/cytoscape@3.30.4/+esm";
-import cola from "https://cdn.jsdelivr.net/npm/cytoscape-cola@2.5.1/+esm";
+import elk from "https://esm.sh/cytoscape-elk@2.3.0";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked@15.0.6/lib/marked.esm.js";
 import { SemR } from "./semr.js";
 
-cytoscape.use(cola);
+cytoscape.use(elk);
 
 const form = document.querySelector("#convert-form");
 const formulaInput = document.querySelector("#formula");
@@ -50,6 +50,7 @@ function clearError() {
 function resetOutputs() {
   normalizedBox.textContent = "";
   graphBox.innerHTML = "";
+  graphBox.style.height = "";
   if (cy) {
     cy.destroy();
     cy = null;
@@ -142,6 +143,7 @@ function renderGraph(graphData) {
           shape: "rectangle",
           width: "label",
           height: "label",
+          padding: "6px",
         },
       },
       {
@@ -176,7 +178,9 @@ function renderGraph(graphData) {
           "line-color": "#4a4a4a",
           "target-arrow-color": "#4a4a4a",
           "target-arrow-shape": "triangle",
-          "curve-style": "bezier",
+          "curve-style": "unbundled-bezier",
+          "control-point-distances": 40,
+          "control-point-weights": 0.5,
           label: "data(label)",
           "font-family": "Helvetica, Arial, sans-serif",
           color: "#4a4a4a",
@@ -186,17 +190,34 @@ function renderGraph(graphData) {
       },
     ],
     layout: {
-      name: "cola",
+      name: "elk",
+      nodeDimensionsIncludeLabels: true,
       animate: false,
-      randomize: false,
-      avoidOverlap: true,
-      handleDisconnected: true,
-      nodeSpacing: 24,
-      edgeLengthVal: 90,
-      flow: { axis: "y", minSeparation: 50 },
-      padding: 24,
       fit: true,
+      elk: {
+        algorithm: "layered",
+        "elk.direction": "DOWN",
+        "elk.spacing.nodeNode": "28",
+        "elk.layered.spacing.nodeNodeBetweenLayers": "44",
+        "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
+        "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
+        "elk.edgeRouting": "SPLINES",
+      },
+      padding: 36,
     },
+  });
+
+  cy.one("layoutstop", () => {
+    const bounds = cy.elements().boundingBox();
+    if (!Number.isFinite(bounds.h) || bounds.h <= 0) {
+      return;
+    }
+
+    // Expand the viewport with the graph so text stays readable instead of over-shrinking.
+    const targetHeight = Math.max(420, Math.ceil(bounds.h + 120));
+    graphBox.style.height = `${targetHeight}px`;
+    cy.resize();
+    cy.fit(cy.elements(), 48);
   });
 }
 

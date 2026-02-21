@@ -27,4 +27,4 @@ Essayez de convertir ces formules:
 - `rendre#I.A.1(v,g,m) & v:voisin#II(m) & g:guitare(m) & m:moi#I`
 - `[Th c:chat(Julie) & petit(c) & noir(c)] [Rh d:dormir(c) & bien(d) & sur(d, tapis)] [Spéc penser(moi, d)]`
 - `[Spéc causer(t1, t2) & t1:tomber(Carl) & Carl] [Th Jeanne] [Rh t2:tomber(Jeanne)]`
-- `[Spéc temps(c, l)] [Th b:bourse(Shanghai) & sg1:singulier(b) & défini(b) & r:rouvrir(b) & après(r, fds) & fds:fin_de_semaine & long(fds) & sg2:singulier(fds) & indéfini(fds) & imparfait(r)] [Rh c:chuter(b) & brutal(c) & passé_composé(c)]`
+- `[Spéc temps(c, l) & l:lundi] [Th b:bourse(S) & S:Shanghai & sg1:singulier(b) & défini(b) & r:rouvrir(b) & après(r, fds) & fds:fin_de_semaine & long(fds) & sg2:singulier(fds) & indéfini(fds) & imparfait(r)] [Rh c:chuter(b) & brutal(c) & passé_composé(c)]`

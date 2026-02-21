@@ -1,6 +1,9 @@
 import cytoscape from "https://cdn.jsdelivr.net/npm/cytoscape@3.30.4/+esm";
+import cola from "https://cdn.jsdelivr.net/npm/cytoscape-cola@2.5.1/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked@15.0.6/lib/marked.esm.js";
 import { SemR } from "./semr.js";
+
+cytoscape.use(cola);
 
 const form = document.querySelector("#convert-form");
 const formulaInput = document.querySelector("#formula");
@@ -124,38 +127,40 @@ function renderGraph(graphData) {
     wheelSensitivity: 0.15,
     style: [
       {
-        selector: "node",
+        selector: "node:not(.subgraph)",
         style: {
           label: "data(label)",
+          "font-family": "Helvetica, Arial, sans-serif",
           color: "#0b113a",
-          "font-size": 13,
+          "font-size": "12pt",
           "text-wrap": "wrap",
           "text-max-width": 200,
-          "text-valign": "bottom",
+          "text-valign": "center",
           "text-halign": "center",
-          "text-margin-y": 10,
-          "background-color": "#ffffff",
-          "border-width": 2,
-          "border-color": "#0b113a",
-          shape: "ellipse",
-          width: 14,
-          height: 14,
+          "background-opacity": 0,
+          "border-width": 0,
+          shape: "rectangle",
+          width: "label",
+          height: "label",
         },
       },
       {
         selector: "node.subgraph",
         style: {
           label: "data(label)",
+          "font-family": "Helvetica, Arial, sans-serif",
           "text-valign": "top",
           "text-halign": "left",
+          "text-margin-x": 8,
+          "text-margin-y": 8,
           "background-color": "#f5f7ff",
+          "background-opacity": 1,
+          "border-width": 2,
           "border-color": "#6a83fe",
           color: "#4e64ce",
-          "font-size": 13,
+          "font-size": "12pt",
           shape: "round-rectangle",
-          width: "label",
-          height: "label",
-          padding: "20px",
+          padding: "28px",
         },
       },
       {
@@ -173,21 +178,23 @@ function renderGraph(graphData) {
           "target-arrow-shape": "triangle",
           "curve-style": "bezier",
           label: "data(label)",
+          "font-family": "Helvetica, Arial, sans-serif",
           color: "#4a4a4a",
-          "font-size": 12,
-          "text-background-color": "#ffffff",
-          "text-background-opacity": 1,
-          "text-background-padding": 2,
+          "font-size": "8pt",
           "text-margin-y": -8,
         },
       },
     ],
     layout: {
-      name: "breadthfirst",
-      directed: true,
-      spacingFactor: 1.2,
-      padding: 24,
+      name: "cola",
       animate: false,
+      randomize: false,
+      avoidOverlap: true,
+      handleDisconnected: true,
+      nodeSpacing: 24,
+      edgeLengthVal: 90,
+      flow: { axis: "y", minSeparation: 50 },
+      padding: 24,
       fit: true,
     },
   });

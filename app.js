@@ -116,6 +116,8 @@ async function copyNormalizedFormula() {
 }
 
 function renderGraph(graphData) {
+  const DRAG_SNAP_GRID = 20;
+
   if (cy) {
     cy.destroy();
     cy = null;
@@ -248,7 +250,20 @@ function renderGraph(graphData) {
   layout.on("layoutstop", adjustGraphViewport);
   layout.run();
   requestAnimationFrame(() => requestAnimationFrame(adjustGraphViewport));
-  cy.on("dragfree", "node", updateEdgeLabelOffsets);
+  cy.on("dragfree", "node", (event) => {
+    const node = event.target;
+    const position = node.position();
+    const snappedPosition = {
+      x: Math.round(position.x / DRAG_SNAP_GRID) * DRAG_SNAP_GRID,
+      y: Math.round(position.y / DRAG_SNAP_GRID) * DRAG_SNAP_GRID,
+    };
+
+    // Avoid no-op position writes when the node is already on-grid.
+    if (position.x !== snappedPosition.x || position.y !== snappedPosition.y) {
+      node.position(snappedPosition);
+    }
+    updateEdgeLabelOffsets();
+  });
 }
 
 async function downloadPng() {

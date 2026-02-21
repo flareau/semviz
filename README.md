@@ -2,7 +2,7 @@
 
 Client-side semantic graph converter.
 
-This project parses predicate-logic-like formulas and renders semantic graphs directly in the browser using `@hpcc-js/wasm` (Graphviz WebAssembly).
+This project parses predicate-logic-like formulas and renders semantic graphs directly in the browser using `cytoscape.js`.
 
 ## Run
 

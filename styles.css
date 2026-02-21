@@ -202,13 +202,12 @@ code,
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 10px;
-  min-height: 240px;
+  min-height: 320px;
   padding: 0.4rem;
 }
 
-.graph svg {
-  width: 100%;
-  height: auto;
+.graph canvas {
+  display: block;
 }
 
 .instructions {

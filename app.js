@@ -1,4 +1,4 @@
-import { Graphviz } from "https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@2.20.0/+esm";
+import cytoscape from "https://cdn.jsdelivr.net/npm/cytoscape@3.30.4/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked@15.0.6/lib/marked.esm.js";
 import { SemR } from "./semr.js";
 
@@ -15,9 +15,8 @@ const graphBox = document.querySelector("#graph");
 const downloadButtons = document.querySelectorAll(".download-btn");
 const instructionsContent = document.querySelector("#instructions-content");
 
-const graphvizReady = Graphviz.load();
-let lastDot = "";
-let lastSvg = "";
+let cy = null;
+let lastGraphData = null;
 
 async function loadInstructions() {
   if (!instructionsContent) {
@@ -48,8 +47,11 @@ function clearError() {
 function resetOutputs() {
   normalizedBox.textContent = "";
   graphBox.innerHTML = "";
-  lastDot = "";
-  lastSvg = "";
+  if (cy) {
+    cy.destroy();
+    cy = null;
+  }
+  lastGraphData = null;
   setDownloadsEnabled(false);
 }
 
@@ -109,73 +111,111 @@ async function copyNormalizedFormula() {
   fallback.remove();
 }
 
-function svgDimensions(svg) {
-  const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
-  const svgEl = doc.documentElement;
-  const width = Number.parseFloat(svgEl.getAttribute("width"));
-  const height = Number.parseFloat(svgEl.getAttribute("height"));
-  if (Number.isFinite(width) && Number.isFinite(height)) {
-    return { width, height };
+function renderGraph(graphData) {
+  if (cy) {
+    cy.destroy();
+    cy = null;
   }
-  const viewBox = svgEl.getAttribute("viewBox");
-  if (viewBox) {
-    const parts = viewBox.split(/\s+/).map((p) => Number.parseFloat(p));
-    if (parts.length === 4 && Number.isFinite(parts[2]) && Number.isFinite(parts[3])) {
-      return { width: parts[2], height: parts[3] };
-    }
-  }
-  return { width: 1200, height: 900 };
+
+  graphBox.innerHTML = "";
+  cy = cytoscape({
+    container: graphBox,
+    elements: [...graphData.nodes, ...graphData.edges],
+    wheelSensitivity: 0.15,
+    style: [
+      {
+        selector: "node",
+        style: {
+          label: "data(label)",
+          color: "#0b113a",
+          "font-size": 13,
+          "text-wrap": "wrap",
+          "text-max-width": 200,
+          "text-valign": "bottom",
+          "text-halign": "center",
+          "text-margin-y": 10,
+          "background-color": "#ffffff",
+          "border-width": 2,
+          "border-color": "#0b113a",
+          shape: "ellipse",
+          width: 14,
+          height: 14,
+        },
+      },
+      {
+        selector: "node.subgraph",
+        style: {
+          label: "data(label)",
+          "text-valign": "top",
+          "text-halign": "left",
+          "background-color": "#f5f7ff",
+          "border-color": "#6a83fe",
+          color: "#4e64ce",
+          "font-size": 13,
+          shape: "round-rectangle",
+          width: "label",
+          height: "label",
+          padding: "20px",
+        },
+      },
+      {
+        selector: "node.dominant",
+        style: {
+          "font-weight": 700,
+        },
+      },
+      {
+        selector: "edge",
+        style: {
+          width: 1.8,
+          "line-color": "#4a4a4a",
+          "target-arrow-color": "#4a4a4a",
+          "target-arrow-shape": "triangle",
+          "curve-style": "bezier",
+          label: "data(label)",
+          color: "#4a4a4a",
+          "font-size": 12,
+          "text-background-color": "#ffffff",
+          "text-background-opacity": 1,
+          "text-background-padding": 2,
+          "text-margin-y": -8,
+        },
+      },
+    ],
+    layout: {
+      name: "breadthfirst",
+      directed: true,
+      spacingFactor: 1.2,
+      padding: 24,
+      animate: false,
+      fit: true,
+    },
+  });
 }
-
-async function svgToPngBlob(svg) {
-  const { width, height } = svgDimensions(svg);
-  const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-
-  try {
-    const image = await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = url;
-    });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.ceil(width));
-    canvas.height = Math.max(1, Math.ceil(height));
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    return await new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error("PNG conversion failed"));
-        }
-      }, "image/png");
-    });
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
 
 async function downloadPng() {
-  const blob = await svgToPngBlob(lastSvg);
+  if (!cy) {
+    return;
+  }
+  const dataUrl = cy.png({ full: true, scale: 2, bg: "#ffffff" });
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
   const buffer = await blob.arrayBuffer();
   download("graph.png", "image/png", buffer);
 }
 
-
-function downloadDot() {
-  download("graph.dot", "text/plain;charset=utf-8", lastDot);
+function downloadJson() {
+  if (!lastGraphData) {
+    return;
+  }
+  const payload = JSON.stringify(lastGraphData, null, 2);
+  download("graph.cytoscape.json", "application/json;charset=utf-8", payload);
 }
 
 
 downloadButtons.forEach((button) => {
   button.addEventListener("click", async () => {
-    if (!lastSvg || !lastDot) {
+    if (!cy || !lastGraphData) {
       return;
     }
     try {
@@ -184,8 +224,8 @@ downloadButtons.forEach((button) => {
         await downloadPng();
         return;
       }
-      if (format === "dot") {
-        downloadDot();
+      if (format === "json") {
+        downloadJson();
       }
     } catch {
       showError("Erreur dans le téléchargement du fichier.");
@@ -231,11 +271,11 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  let dot;
+  let graphData;
   let clean;
   try {
     clean = semr.toString();
-    dot = semr.graphviz(graphOptions());
+    graphData = semr.cytoscape(graphOptions());
   } catch {
     showError("Erreur dans la génération du graphe.");
     return;
@@ -244,11 +284,8 @@ form.addEventListener("submit", async (event) => {
   normalizedBox.textContent = clean;
 
   try {
-    const graphviz = await graphvizReady;
-    const svg = await graphviz.dot(dot);
-    graphBox.innerHTML = svg;
-    lastDot = dot;
-    lastSvg = svg;
+    renderGraph(graphData);
+    lastGraphData = graphData;
     setDownloadsEnabled(true);
   } catch {
     showError("Erreur dans la génération du graphe.");

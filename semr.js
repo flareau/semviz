@@ -1,7 +1,3 @@
-const NODE_COLOR = "#000000";
-const EDGE_COLOR = "#4a4a4a";
-const SUBGRAPH_COLOR = "#6a83fe";
-
 class SemR {
   constructor(text) {
     this.subgraphs = this.#parse(text);
@@ -106,6 +102,21 @@ class SemR {
     return handle === pred ? pred : `${handle}:${pred}`;
   }
 
+  #normalizePredicate(pred, { quotes, spaces, showLexnum, hideLexnum }) {
+    let normalized = pred;
+    const shouldShowLexnum = hideLexnum === undefined ? showLexnum : !hideLexnum;
+    if (!shouldShowLexnum) {
+      normalized = normalized.replace(/#.+$/u, "");
+    }
+    if (spaces) {
+      normalized = normalized.replace(/_/g, " ").trim();
+    }
+    if (quotes) {
+      normalized = `‘${normalized}’`;
+    }
+    return normalized;
+  }
+
   toString() {
     const chunks = [];
     for (const [name, nodes] of this.subgraphs.entries()) {
@@ -121,88 +132,84 @@ class SemR {
     return chunks.join(" ").replace(/\(\)/g, "");
   }
 
-  #quoteId(value) {
-    return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-  }
+  cytoscape({ quotes = true, spaces = true, dominance = true, showLexnum = true, hideLexnum = undefined } = {}) {
+    const nodes = [];
+    const edges = [];
+    const knownHandles = new Set();
+    const referencedArgs = new Set();
 
-  #quoteDotString(value) {
-    return this.#quoteId(value);
-  }
-
-  graphviz({ quotes = true, spaces = true, label = null, dominance = true, showLexnum = true, hideLexnum = undefined } = {}) {
-    const lines = [
-      "digraph {",
-      "  graph [margin=0];",
-      "  graph [splines=true];",
-      `  node [shape=plaintext, color="${NODE_COLOR}", fontcolor="${NODE_COLOR}"];`,
-      `  edge [arrowhead=vee, color="${EDGE_COLOR}", fontcolor="${EDGE_COLOR}"];`,
-    ];
-
-    if (label) {
-      lines.push(`  graph [label=${this.#quoteDotString(label)}];`);
-    }
-
-    const sgIndex = new Map();
-    const rootNodes = [];
-    const rootEdges = [];
-    for (const [name, nodes] of this.subgraphs.entries()) {
-      for (const [handle] of nodes) {
-        sgIndex.set(handle, name);
+    for (const [name, subgraphNodes] of this.subgraphs.entries()) {
+      for (const [handle] of subgraphNodes) {
+        knownHandles.add(handle);
       }
     }
 
-    for (const [name, nodes] of this.subgraphs.entries()) {
-      const sgName = name ? `cluster_${name}` : "cluster_0";
-      const sgLabel = name ? `<<b>${name}</b>>` : '""';
+    for (const [name] of this.subgraphs.entries()) {
+      if (name === null) {
+        continue;
+      }
+      nodes.push({
+        data: {
+          id: `subgraph:${name}`,
+          label: name,
+        },
+        classes: "subgraph",
+      });
+    }
 
-      lines.push(`  subgraph ${this.#quoteId(sgName)} {`);
-      lines.push(`    graph [style=rounded, ranksep=0, nodesep=0, labeljust=l, color="${SUBGRAPH_COLOR}", fontcolor="${SUBGRAPH_COLOR}", label=${sgLabel}]; `);
+    let edgeIndex = 0;
 
+    for (const [name, subgraphNodes] of this.subgraphs.entries()) {
       let dominant = true;
-      for (const [handle, rawPred, args] of nodes) {
-        let pred = rawPred;
-        const shouldShowLexnum = hideLexnum === undefined ? showLexnum : !hideLexnum;
-        if (!shouldShowLexnum) {
-          pred = pred.replace(/#.+$/u, "");
-        }
-        if (spaces) {
-          pred = pred.replace(/_/g, " ").trim();
-        }
-        if (quotes) {
-          pred = `‘${pred}’`;
-        }
+      for (const [handle, rawPred, args] of subgraphNodes) {
+        const nodeClasses = [];
         if (dominance && dominant) {
-          pred = `<b>${pred}</b>`;
+          nodeClasses.push("dominant");
         }
-        const htmlLabel = `<${pred}>`;
-        lines.push(`    ${this.#quoteId(handle)} [label=${htmlLabel}];`);
+
+        const nodeData = {
+          id: handle,
+          label: this.#normalizePredicate(rawPred, { quotes, spaces, showLexnum, hideLexnum }),
+        };
+
+        if (name !== null) {
+          nodeData.parent = `subgraph:${name}`;
+        }
+
+        nodes.push({
+          data: nodeData,
+          classes: nodeClasses.join(" "),
+        });
 
         for (let i = 0; i < args.length; i += 1) {
           const arg = args[i];
-          rootNodes.push(`  ${this.#quoteId(arg)};`);
-          if (!sgIndex.has(arg) || sgIndex.get(arg) === name) {
-            lines.push(`    ${this.#quoteId(arg)};`);
-          }
-
-          let constraint = "true";
-          if (sgIndex.has(arg) && sgIndex.get(arg) !== name) {
-            constraint = "false";
-          }
-          rootEdges.push(
-            `  ${this.#quoteId(handle)} -> ${this.#quoteId(arg)} [label=${this.#quoteDotString(String(i + 1))}, constraint=${constraint}];`,
-          );
+          referencedArgs.add(arg);
+          const edgeData = {
+            id: `e${edgeIndex}`,
+            source: handle,
+            target: arg,
+            label: String(i + 1),
+          };
+          edges.push({ data: edgeData });
+          edgeIndex += 1;
         }
 
         dominant = false;
       }
-
-      lines.push("  }");
     }
 
-    lines.push(...rootNodes);
-    lines.push(...rootEdges);
-    lines.push("}");
-    return lines.join("\n");
+    for (const arg of referencedArgs) {
+      if (knownHandles.has(arg)) {
+        continue;
+      }
+      const argData = {
+        id: arg,
+        label: arg,
+      };
+      nodes.push({ data: argData });
+    }
+
+    return { nodes, edges };
   }
 }
 

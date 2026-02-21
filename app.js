@@ -1,9 +1,9 @@
 import cytoscape from "https://cdn.jsdelivr.net/npm/cytoscape@3.30.4/+esm";
-import elk from "https://esm.sh/cytoscape-elk@2.3.0";
+import dagre from "https://esm.sh/cytoscape-dagre@2.5.0";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked@15.0.6/lib/marked.esm.js";
 import { SemR } from "./semr.js";
 
-cytoscape.use(elk);
+cytoscape.use(dagre);
 
 const form = document.querySelector("#convert-form");
 const formulaInput = document.querySelector("#formula");
@@ -188,26 +188,16 @@ function renderGraph(graphData) {
       },
     ],
     layout: {
-      name: "elk",
+      name: "dagre",
       nodeDimensionsIncludeLabels: true,
       animate: false,
+      rankDir: "TB",
+      ranker: "network-simplex",
+      spacingFactor: 0.85,
+      nodeSep: 24,
+      edgeSep: 10,
+      rankSep: 42,
       fit: true,
-      elk: {
-        algorithm: "layered",
-        "elk.direction": "DOWN",
-        "elk.separateConnectedComponents": "true",
-        "elk.spacing.nodeNode": "44",
-        "elk.spacing.edgeNode": "28",
-        "elk.spacing.edgeEdge": "20",
-        "elk.spacing.labelNode": "14",
-        "elk.spacing.labelEdge": "10",
-        "elk.layered.spacing.nodeNodeBetweenLayers": "72",
-        "elk.layered.spacing.edgeNodeBetweenLayers": "30",
-        "elk.layered.unnecessaryBendpoints": "false",
-        "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
-        "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
-        "elk.edgeRouting": "SPLINES",
-      },
       padding: 36,
     },
   });

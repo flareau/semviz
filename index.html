@@ -15,28 +15,34 @@
   <body>
     <main class="layout">
       <header class="page-head">
-        <h1>Semviz</h1>
-        <p>Éditeur de représentation sémantique.</p>
+        <div class="page-head-main">
+          <h1>Semviz</h1>
+          <p data-i18n="page.subtitle">Éditeur de représentation sémantique.</p>
+        </div>
+        <div class="lang-switch" role="group" data-i18n-aria-label="language.group_aria" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang="fr" aria-pressed="true">FR</button>
+          <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+        </div>
       </header>
       <section class="panel input-panel">
         <form id="convert-form">
-          <label for="formula">Formule à convertir</label>
+          <label for="formula" data-i18n="form.formula_label">Formule à convertir</label>
           <textarea id="formula" name="formula" rows="6" required></textarea>
           <details class="render-options-toggle">
-            <summary>Options d’affichage</summary>
+            <summary data-i18n="form.display_options">Options d’affichage</summary>
             <fieldset class="render-options">
-              <label class="render-option"><input id="opt-dominance" class="render-option-input" type="checkbox" checked /> Dominance</label>
-              <label class="render-option"><input id="opt-spaces" class="render-option-input" type="checkbox" checked /> Espaces</label>
-              <label class="render-option"><input id="opt-quotes" class="render-option-input" type="checkbox" checked /> Guillemets</label>
-              <label class="render-option"><input id="opt-lexnum" class="render-option-input" type="checkbox" checked /> Acceptions</label>
+              <label class="render-option"><input id="opt-dominance" class="render-option-input" type="checkbox" checked /> <span data-i18n="form.option_dominance">Dominance</span></label>
+              <label class="render-option"><input id="opt-spaces" class="render-option-input" type="checkbox" checked /> <span data-i18n="form.option_spaces">Espaces</span></label>
+              <label class="render-option"><input id="opt-quotes" class="render-option-input" type="checkbox" checked /> <span data-i18n="form.option_quotes">Guillemets</span></label>
+              <label class="render-option"><input id="opt-lexnum" class="render-option-input" type="checkbox" checked /> <span data-i18n="form.option_lexnum">Acceptions</span></label>
             </fieldset>
           </details>
-          <button type="submit" class="primary-btn">Convertir</button>
+          <button type="submit" class="primary-btn" data-i18n="form.convert">Convertir</button>
         </form>
         <details class="instructions-toggle">
-          <summary>Instructions</summary>
+          <summary data-i18n="instructions.summary">Instructions</summary>
           <section class="instructions">
-            <div id="instructions-content">Chargement des instructions…</div>
+            <div id="instructions-content" data-i18n="instructions.loading">Chargement des instructions…</div>
           </section>
         </details>
       </section>
@@ -45,8 +51,8 @@
         <p id="error" class="error" hidden></p>
 
         <div class="section-head">
-          <h2>Formule normalisée</h2>
-          <button type="button" id="copy-normalized" class="icon-btn" title="Copier la formule normalisée" aria-label="Copier la formule normalisée">
+          <h2 data-i18n="output.normalized_title">Formule normalisée</h2>
+          <button type="button" id="copy-normalized" class="icon-btn" data-i18n-title="output.copy_title" data-i18n-aria-label="output.copy_title" title="Copier la formule normalisée" aria-label="Copier la formule normalisée">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H10V7h9v14z" />
             </svg>
@@ -55,9 +61,9 @@
         <pre id="normalized" class="code"></pre>
 
         <div class="section-head">
-          <h2>Graphe</h2>
+          <h2 data-i18n="output.graph_title">Graphe</h2>
           <div class="download-actions">
-            <button type="button" class="download-btn" data-format="png" title="Télécharger PNG" disabled>
+            <button type="button" class="download-btn" data-format="png" data-i18n-title="output.download_png_title" title="Télécharger PNG" disabled>
               PNG
             </button>
           </div>

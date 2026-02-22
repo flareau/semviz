@@ -17,23 +17,115 @@ const normalizedBox = document.querySelector("#normalized");
 const graphBox = document.querySelector("#graph");
 const downloadButtons = document.querySelectorAll(".download-btn");
 const instructionsContent = document.querySelector("#instructions-content");
+const languageButtons = document.querySelectorAll(".lang-btn");
 
 let cy = null;
 let lastGraphData = null;
+let currentLanguage = "fr";
 
-async function loadInstructions() {
+const I18N = {
+  fr: {
+    "page.subtitle": "Éditeur de représentation sémantique.",
+    "language.group_aria": "Langue",
+    "form.formula_label": "Formule à convertir",
+    "form.display_options": "Options d'affichage",
+    "form.option_dominance": "Dominance",
+    "form.option_spaces": "Espaces",
+    "form.option_quotes": "Guillemets",
+    "form.option_lexnum": "Acceptions",
+    "form.convert": "Convertir",
+    "instructions.summary": "Instructions",
+    "instructions.loading": "Chargement des instructions...",
+    "instructions.load_error": "Impossible de charger les instructions.",
+    "output.normalized_title": "Formule normalisée",
+    "output.copy_title": "Copier la formule normalisée",
+    "output.graph_title": "Graphe",
+    "output.download_png_title": "Télécharger PNG",
+    "error.download": "Erreur dans le téléchargement du fichier.",
+    "error.copy": "Impossible de copier automatiquement. Utilisez Ctrl/Cmd+C.",
+    "error.formula": "Il y a une erreur dans la formule.",
+    "error.generate": "Erreur dans la génération du graphe.",
+  },
+  en: {
+    "page.subtitle": "Semantic representation editor.",
+    "language.group_aria": "Language",
+    "form.formula_label": "Formula to convert",
+    "form.display_options": "Display options",
+    "form.option_dominance": "Dominance",
+    "form.option_spaces": "Spaces",
+    "form.option_quotes": "Quotes",
+    "form.option_lexnum": "Senses",
+    "form.convert": "Convert",
+    "instructions.summary": "Instructions",
+    "instructions.loading": "Loading instructions...",
+    "instructions.load_error": "Unable to load instructions.",
+    "output.normalized_title": "Normalized formula",
+    "output.copy_title": "Copy normalized formula",
+    "output.graph_title": "Graph",
+    "output.download_png_title": "Download PNG",
+    "error.download": "Error while downloading file.",
+    "error.copy": "Unable to copy automatically. Use Ctrl/Cmd+C.",
+    "error.formula": "There is an error in the formula.",
+    "error.generate": "Error while generating graph.",
+  },
+};
+
+function t(key) {
+  return I18N[currentLanguage]?.[key] ?? key;
+}
+
+function applyTranslations() {
+  document.documentElement.lang = currentLanguage;
+
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const key = element.getAttribute("data-i18n");
+    if (!key) {
+      return;
+    }
+    element.textContent = t(key);
+  });
+
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-title");
+    if (!key) {
+      return;
+    }
+    element.setAttribute("title", t(key));
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-aria-label");
+    if (!key) {
+      return;
+    }
+    element.setAttribute("aria-label", t(key));
+  });
+}
+
+function instructionsPath(language) {
+  return `./instructions.${language}.md`;
+}
+
+function syncLanguageButtons(language) {
+  languageButtons.forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.lang === language));
+  });
+}
+
+async function loadInstructions(language = currentLanguage) {
   if (!instructionsContent) {
     return;
   }
+  instructionsContent.textContent = t("instructions.loading");
   try {
-    const response = await fetch("./instructions.md");
+    const response = await fetch(instructionsPath(language));
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
     const markdown = await response.text();
     instructionsContent.innerHTML = marked.parse(markdown);
   } catch {
-    instructionsContent.textContent = "Impossible de charger les instructions.";
+    instructionsContent.textContent = t("instructions.load_error");
   }
 }
 
@@ -355,7 +447,7 @@ downloadButtons.forEach((button) => {
         return;
       }
     } catch {
-      showError("Erreur dans le téléchargement du fichier.");
+      showError(t("error.download"));
     }
   });
 });
@@ -365,12 +457,30 @@ if (copyNormalizedButton) {
     try {
       await copyNormalizedFormula();
     } catch {
-      showError("Impossible de copier automatiquement. Utilisez Ctrl/Cmd+C.");
+      showError(t("error.copy"));
     }
   });
 }
 
+applyTranslations();
 void loadInstructions();
+syncLanguageButtons(currentLanguage);
+
+languageButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const language = button.dataset.lang;
+    if (language !== "fr" && language !== "en") {
+      return;
+    }
+    if (language === currentLanguage) {
+      return;
+    }
+    currentLanguage = language;
+    applyTranslations();
+    syncLanguageButtons(currentLanguage);
+    void loadInstructions(currentLanguage);
+  });
+});
 
 [dominanceInput, spacesInput, quotesInput, showLexnumInput].forEach((input) => {
   if (!input) {
@@ -394,7 +504,7 @@ form.addEventListener("submit", async (event) => {
     const formula = sanitizeFormula(formulaInput.value);
     semr = new SemR(formula);
   } catch {
-    showError("Il y a une erreur dans la formule.");
+    showError(t("error.formula"));
     return;
   }
 
@@ -404,7 +514,7 @@ form.addEventListener("submit", async (event) => {
     clean = semr.toString();
     graphData = semr.cytoscape(graphOptions());
   } catch {
-    showError("Erreur dans la génération du graphe.");
+    showError(t("error.generate"));
     return;
   }
 
@@ -415,6 +525,6 @@ form.addEventListener("submit", async (event) => {
     lastGraphData = graphData;
     setDownloadsEnabled(true);
   } catch {
-    showError("Erreur dans la génération du graphe.");
+    showError(t("error.generate"));
   }
 });

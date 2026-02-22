@@ -41,6 +41,7 @@ const I18N = {
     "output.copy_title": "Copier la formule normalisée",
     "output.graph_title": "Graphe",
     "output.download_png_title": "Télécharger PNG",
+    "output.download_json_title": "Télécharger JSON",
     "error.download": "Erreur dans le téléchargement du fichier.",
     "error.copy": "Impossible de copier automatiquement. Utilisez Ctrl/Cmd+C.",
     "error.formula": "Il y a une erreur dans la formule.",
@@ -63,6 +64,7 @@ const I18N = {
     "output.copy_title": "Copy normalized formula",
     "output.graph_title": "Graph",
     "output.download_png_title": "Download PNG",
+    "output.download_json_title": "Download JSON",
     "error.download": "Error while downloading file.",
     "error.copy": "Unable to copy automatically. Use Ctrl/Cmd+C.",
     "error.formula": "There is an error in the formula.",
@@ -264,25 +266,6 @@ function renderGraph(graphData) {
         },
       },
       {
-        selector: "node.lexnum-node",
-        style: {
-          label: "data(label)",
-          "font-family": "Helvetica, Arial, sans-serif",
-          "font-size": "9pt",
-          color: "#3a446f",
-          "text-wrap": "none",
-          "text-valign": "center",
-          "text-halign": "center",
-          "background-opacity": 0,
-          "border-width": 0,
-          shape: "rectangle",
-          width: "label",
-          height: "label",
-          padding: "1px",
-          events: "no",
-        },
-      },
-      {
         selector: "edge",
         style: {
           width: 1.8,
@@ -302,15 +285,6 @@ function renderGraph(graphData) {
         style: {
           "text-margin-x": 8,
           "text-margin-y": 0,
-        },
-      },
-      {
-        selector: "edge.lexnum-edge",
-        style: {
-          width: 0,
-          opacity: 0,
-          "target-arrow-shape": "none",
-          label: "",
         },
       },
     ],
@@ -347,30 +321,7 @@ function renderGraph(graphData) {
     if (!cy || cy.destroyed()) {
       return;
     }
-    cy.nodes(":not(.lexnum-node)").forEach(snapNodeToGrid);
-  }
-
-  function positionLexnumNodes() {
-    if (!cy || cy.destroyed()) {
-      return;
-    }
-    cy.nodes("node.lexnum-node").forEach((lexNode) => {
-      const ownerId = lexNode.data("lexnumFor");
-      if (!ownerId) {
-        return;
-      }
-      const ownerNode = cy.getElementById(ownerId);
-      if (!ownerNode || ownerNode.empty()) {
-        return;
-      }
-      const ownerPos = ownerNode.position();
-      const offsetX = Math.max(4, ownerNode.width() / 2 + 1);
-      const offsetY = Math.max(3, ownerNode.height() / 2 - 3);
-      lexNode.position({
-        x: ownerPos.x + offsetX,
-        y: ownerPos.y + offsetY,
-      });
-    });
+    cy.nodes().forEach(snapNodeToGrid);
   }
 
   function adjustGraphViewport() {
@@ -394,7 +345,7 @@ function renderGraph(graphData) {
     updateEdgeLabelOffsets();
   }
 
-  const layout = cy.elements(":not(.lexnum-node):not(.lexnum-edge)").layout({
+  const layout = cy.layout({
     name: "dagre",
     nodeDimensionsIncludeLabels: true,
     animate: false,
@@ -409,17 +360,12 @@ function renderGraph(graphData) {
   });
   layout.on("layoutstop", () => {
     snapAllNodesToGrid();
-    positionLexnumNodes();
     adjustGraphViewport();
   });
   layout.run();
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    positionLexnumNodes();
-    adjustGraphViewport();
-  }));
-  cy.on("dragfree", "node:not(.lexnum-node)", (event) => {
+  requestAnimationFrame(() => requestAnimationFrame(adjustGraphViewport));
+  cy.on("dragfree", "node", (event) => {
     snapNodeToGrid(event.target);
-    positionLexnumNodes();
     updateEdgeLabelOffsets();
   });
 }
@@ -435,6 +381,14 @@ async function downloadPng() {
   download("graph.png", "image/png", buffer);
 }
 
+function downloadJson() {
+  if (!lastGraphData) {
+    return;
+  }
+  const payload = JSON.stringify(lastGraphData, null, 2);
+  download("graph.cytoscape.json", "application/json;charset=utf-8", payload);
+}
+
 downloadButtons.forEach((button) => {
   button.addEventListener("click", async () => {
     if (!cy || !lastGraphData) {
@@ -445,6 +399,9 @@ downloadButtons.forEach((button) => {
       if (format === "png") {
         await downloadPng();
         return;
+      }
+      if (format === "json") {
+        downloadJson();
       }
     } catch {
       showError(t("error.download"));

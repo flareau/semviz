@@ -343,15 +343,6 @@ async function downloadPng() {
   download("graph.png", "image/png", buffer);
 }
 
-function downloadJson() {
-  if (!lastGraphData) {
-    return;
-  }
-  const payload = JSON.stringify(lastGraphData, null, 2);
-  download("graph.cytoscape.json", "application/json;charset=utf-8", payload);
-}
-
-
 downloadButtons.forEach((button) => {
   button.addEventListener("click", async () => {
     if (!cy || !lastGraphData) {
@@ -362,9 +353,6 @@ downloadButtons.forEach((button) => {
       if (format === "png") {
         await downloadPng();
         return;
-      }
-      if (format === "json") {
-        downloadJson();
       }
     } catch {
       showError("Erreur dans le téléchargement du fichier.");

@@ -1,6 +1,8 @@
 class SemR {
   constructor(text) {
-    this.subgraphs = this.#parse(text);
+    const subgraphs = this.#parse(text);
+    this.#validateReferencedAliases(subgraphs);
+    this.subgraphs = subgraphs;
   }
 
   #clean(text) {
@@ -95,7 +97,46 @@ class SemR {
     if (!text) {
       return [];
     }
-    return text.split(",").map((arg) => this.#parseSem(arg));
+    return text.split(",").map((arg) => this.#parseArg(arg));
+  }
+
+  #parseArg(text) {
+    if (text === "_") {
+      return "_";
+    }
+    if (/^\p{Lu}$/u.test(text)) {
+      return text;
+    }
+    if (/^[\p{L}][\p{L}\p{N}]*$/u.test(text)) {
+      return text;
+    }
+    throw new Error(`Can't parse argument: ${text}`);
+  }
+
+  #isVariable(arg) {
+    return /^\p{Lu}$/u.test(arg);
+  }
+
+  #validateReferencedAliases(subgraphs) {
+    const knownHandles = new Set();
+    for (const [, subgraphNodes] of subgraphs.entries()) {
+      for (const [handle] of subgraphNodes) {
+        knownHandles.add(handle);
+      }
+    }
+
+    for (const [, subgraphNodes] of subgraphs.entries()) {
+      for (const [, , args] of subgraphNodes) {
+        for (const arg of args) {
+          if (arg === "_" || this.#isVariable(arg)) {
+            continue;
+          }
+          if (!knownHandles.has(arg)) {
+            throw new Error(`Undefined alias argument: ${arg}`);
+          }
+        }
+      }
+    }
   }
 
   #handlePred(handle, pred) {
@@ -137,6 +178,7 @@ class SemR {
     const edges = [];
     const knownHandles = new Set();
     const referencedArgs = new Set();
+    const implicitVariableOwners = new Map();
 
     for (const [name, subgraphNodes] of this.subgraphs.entries()) {
       for (const [handle] of subgraphNodes) {
@@ -183,6 +225,12 @@ class SemR {
 
         for (let i = 0; i < args.length; i += 1) {
           const arg = args[i];
+          if (arg === "_") {
+            continue;
+          }
+          if (!knownHandles.has(arg) && this.#isVariable(arg) && !implicitVariableOwners.has(arg)) {
+            implicitVariableOwners.set(arg, name);
+          }
           referencedArgs.add(arg);
           const edgeData = {
             id: `e${edgeIndex}`,
@@ -206,6 +254,10 @@ class SemR {
         id: arg,
         label: arg,
       };
+      const ownerSubgraph = implicitVariableOwners.get(arg);
+      if (ownerSubgraph !== undefined && ownerSubgraph !== null) {
+        argData.parent = `subgraph:${ownerSubgraph}`;
+      }
       nodes.push({ data: argData });
     }
 

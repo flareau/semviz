@@ -116,7 +116,7 @@ async function copyNormalizedFormula() {
 }
 
 function renderGraph(graphData) {
-  const DRAG_SNAP_GRID = 20;
+  const DRAG_SNAP_GRID = 10;
 
   if (cy) {
     cy.destroy();
@@ -213,6 +213,26 @@ function renderGraph(graphData) {
     });
   }
 
+  function snapNodeToGrid(node) {
+    const position = node.position();
+    const snappedPosition = {
+      x: Math.round(position.x / DRAG_SNAP_GRID) * DRAG_SNAP_GRID,
+      y: Math.round(position.y / DRAG_SNAP_GRID) * DRAG_SNAP_GRID,
+    };
+
+    // Avoid no-op position writes when the node is already on-grid.
+    if (position.x !== snappedPosition.x || position.y !== snappedPosition.y) {
+      node.position(snappedPosition);
+    }
+  }
+
+  function snapAllNodesToGrid() {
+    if (!cy || cy.destroyed()) {
+      return;
+    }
+    cy.nodes().forEach(snapNodeToGrid);
+  }
+
   function adjustGraphViewport() {
     if (!cy || cy.destroyed()) {
       return;
@@ -239,29 +259,22 @@ function renderGraph(graphData) {
     nodeDimensionsIncludeLabels: true,
     animate: false,
     rankDir: "TB",
-    ranker: "network-simplex",
+    ranker: "tight-tree",
     spacingFactor: 0.85,
-    nodeSep: 30,
+    nodeSep: 36,
     edgeSep: 10,
-    rankSep: 30,
+    rankSep: 36,
     fit: false,
     padding: 6,
   });
-  layout.on("layoutstop", adjustGraphViewport);
+  layout.on("layoutstop", () => {
+    snapAllNodesToGrid();
+    adjustGraphViewport();
+  });
   layout.run();
   requestAnimationFrame(() => requestAnimationFrame(adjustGraphViewport));
   cy.on("dragfree", "node", (event) => {
-    const node = event.target;
-    const position = node.position();
-    const snappedPosition = {
-      x: Math.round(position.x / DRAG_SNAP_GRID) * DRAG_SNAP_GRID,
-      y: Math.round(position.y / DRAG_SNAP_GRID) * DRAG_SNAP_GRID,
-    };
-
-    // Avoid no-op position writes when the node is already on-grid.
-    if (position.x !== snappedPosition.x || position.y !== snappedPosition.y) {
-      node.position(snappedPosition);
-    }
+    snapNodeToGrid(event.target);
     updateEdgeLabelOffsets();
   });
 }

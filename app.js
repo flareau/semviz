@@ -167,7 +167,8 @@ function renderGraph(graphData) {
       {
         selector: "node.dominant",
         style: {
-          "font-weight": 700,
+          "font-weight": "bold",
+          "font-size": "13pt",
         },
       },
       {
@@ -175,7 +176,7 @@ function renderGraph(graphData) {
         style: {
           label: "data(label)",
           "font-family": "Helvetica, Arial, sans-serif",
-          "font-size": "8pt",
+          "font-size": "9pt",
           color: "#3a446f",
           "text-wrap": "none",
           "text-valign": "center",
@@ -200,7 +201,7 @@ function renderGraph(graphData) {
           label: "data(label)",
           "font-family": "Helvetica, Arial, sans-serif",
           color: "#4a4a4a",
-          "font-size": "10pt",
+          "font-size": "11pt",
           "text-margin-y": -8,
         },
       },
@@ -271,8 +272,8 @@ function renderGraph(graphData) {
         return;
       }
       const ownerPos = ownerNode.position();
-      const offsetX = Math.max(8, ownerNode.width() / 2 + 5);
-      const offsetY = Math.max(5, ownerNode.height() / 2 - 1);
+      const offsetX = Math.max(4, ownerNode.width() / 2 + 1);
+      const offsetY = Math.max(3, ownerNode.height() / 2 - 3);
       lexNode.position({
         x: ownerPos.x + offsetX,
         y: ownerPos.y + offsetY,

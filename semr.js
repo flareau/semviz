@@ -187,6 +187,7 @@ class SemR {
     const knownHandles = new Set();
     const referencedArgs = new Set();
     const implicitVariableOwners = new Map();
+    const shouldShowLexnum = hideLexnum === undefined ? showLexnum : !hideLexnum;
 
     for (const { nodes: subgraphNodes } of this.subgraphs) {
       for (const [handle] of subgraphNodes) {
@@ -217,9 +218,13 @@ class SemR {
           nodeClasses.push("dominant");
         }
 
+        const splitAt = rawPred.indexOf("#");
+        const hasVisibleLexnum = shouldShowLexnum && splitAt >= 0;
         const nodeData = {
           id: handle,
-          label: this.#normalizePredicate(rawPred, { quotes, spaces, showLexnum, hideLexnum }),
+          label: hasVisibleLexnum
+            ? this.#normalizePredicate(rawPred, { quotes, spaces, showLexnum, hideLexnum: true })
+            : this.#normalizePredicate(rawPred, { quotes, spaces, showLexnum, hideLexnum }),
         };
 
         if (name !== null) {
@@ -230,6 +235,34 @@ class SemR {
           data: nodeData,
           classes: nodeClasses.join(" "),
         });
+
+        if (hasVisibleLexnum) {
+          const lexnumId = `lexnum:${handle}`;
+          const lexnumData = {
+            id: lexnumId,
+            label: rawPred.slice(splitAt + 1),
+            lexnumFor: handle,
+          };
+          if (name !== null) {
+            lexnumData.parent = `subgraph:${id}`;
+          }
+          nodes.push({
+            data: lexnumData,
+            classes: "lexnum-node",
+            grabbable: false,
+            selectable: false,
+          });
+          edges.push({
+            data: {
+              id: `e${edgeIndex}`,
+              source: handle,
+              target: lexnumId,
+              label: "",
+            },
+            classes: "lexnum-edge",
+          });
+          edgeIndex += 1;
+        }
 
         for (let i = 0; i < args.length; i += 1) {
           const arg = args[i];

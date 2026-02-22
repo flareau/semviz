@@ -171,6 +171,25 @@ function renderGraph(graphData) {
         },
       },
       {
+        selector: "node.lexnum-node",
+        style: {
+          label: "data(label)",
+          "font-family": "Helvetica, Arial, sans-serif",
+          "font-size": "8pt",
+          color: "#3a446f",
+          "text-wrap": "none",
+          "text-valign": "center",
+          "text-halign": "center",
+          "background-opacity": 0,
+          "border-width": 0,
+          shape: "rectangle",
+          width: "label",
+          height: "label",
+          padding: "1px",
+          events: "no",
+        },
+      },
+      {
         selector: "edge",
         style: {
           width: 1.8,
@@ -190,6 +209,15 @@ function renderGraph(graphData) {
         style: {
           "text-margin-x": 8,
           "text-margin-y": 0,
+        },
+      },
+      {
+        selector: "edge.lexnum-edge",
+        style: {
+          width: 0,
+          opacity: 0,
+          "target-arrow-shape": "none",
+          label: "",
         },
       },
     ],
@@ -226,7 +254,30 @@ function renderGraph(graphData) {
     if (!cy || cy.destroyed()) {
       return;
     }
-    cy.nodes().forEach(snapNodeToGrid);
+    cy.nodes(":not(.lexnum-node)").forEach(snapNodeToGrid);
+  }
+
+  function positionLexnumNodes() {
+    if (!cy || cy.destroyed()) {
+      return;
+    }
+    cy.nodes("node.lexnum-node").forEach((lexNode) => {
+      const ownerId = lexNode.data("lexnumFor");
+      if (!ownerId) {
+        return;
+      }
+      const ownerNode = cy.getElementById(ownerId);
+      if (!ownerNode || ownerNode.empty()) {
+        return;
+      }
+      const ownerPos = ownerNode.position();
+      const offsetX = Math.max(8, ownerNode.width() / 2 + 5);
+      const offsetY = Math.max(5, ownerNode.height() / 2 - 1);
+      lexNode.position({
+        x: ownerPos.x + offsetX,
+        y: ownerPos.y + offsetY,
+      });
+    });
   }
 
   function adjustGraphViewport() {
@@ -250,7 +301,7 @@ function renderGraph(graphData) {
     updateEdgeLabelOffsets();
   }
 
-  const layout = cy.layout({
+  const layout = cy.elements(":not(.lexnum-node):not(.lexnum-edge)").layout({
     name: "dagre",
     nodeDimensionsIncludeLabels: true,
     animate: false,
@@ -265,12 +316,17 @@ function renderGraph(graphData) {
   });
   layout.on("layoutstop", () => {
     snapAllNodesToGrid();
+    positionLexnumNodes();
     adjustGraphViewport();
   });
   layout.run();
-  requestAnimationFrame(() => requestAnimationFrame(adjustGraphViewport));
-  cy.on("dragfree", "node", (event) => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    positionLexnumNodes();
+    adjustGraphViewport();
+  }));
+  cy.on("dragfree", "node:not(.lexnum-node)", (event) => {
     snapNodeToGrid(event.target);
+    positionLexnumNodes();
     updateEdgeLabelOffsets();
   });
 }

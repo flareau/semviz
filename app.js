@@ -103,16 +103,12 @@ async function copyNormalizedFormula() {
     await navigator.clipboard.writeText(text);
     return;
   }
-
-  const fallback = document.createElement("textarea");
-  fallback.value = text;
-  fallback.setAttribute("readonly", "");
-  fallback.style.position = "fixed";
-  fallback.style.opacity = "0";
-  document.body.append(fallback);
-  fallback.select();
-  document.execCommand("copy");
-  fallback.remove();
+  if (navigator.clipboard?.write && window.ClipboardItem) {
+    const blob = new Blob([text], { type: "text/plain" });
+    await navigator.clipboard.write([new ClipboardItem({ "text/plain": blob })]);
+    return;
+  }
+  throw new Error("Clipboard API unavailable");
 }
 
 function renderGraph(graphData) {
@@ -324,7 +320,7 @@ if (copyNormalizedButton) {
     try {
       await copyNormalizedFormula();
     } catch {
-      showError("Impossible de copier la formule.");
+      showError("Impossible de copier automatiquement. Utilisez Ctrl/Cmd+C.");
     }
   });
 }

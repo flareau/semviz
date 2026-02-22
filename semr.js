@@ -15,7 +15,7 @@ class SemR {
     if (cleaned.startsWith("[")) {
       return this.#parseSubgraphs(cleaned);
     }
-    return new Map([[null, this.#parseSubgraph(cleaned)]]);
+    return [{ id: null, name: null, nodes: this.#parseSubgraph(cleaned) }];
   }
 
   #parseSubgraphs(text) {
@@ -25,9 +25,17 @@ class SemR {
     }
 
     const matches = [...text.matchAll(/\[([\p{L}\p{M}\p{N}_</>\-]+) ([^\]]+)\]/gu)];
-    const subgraphs = new Map();
+    const labelCounts = new Map();
+    const subgraphs = [];
     for (const m of matches) {
-      subgraphs.set(m[1], this.#parseSubgraph(m[2]));
+      const label = m[1];
+      const count = (labelCounts.get(label) ?? 0) + 1;
+      labelCounts.set(label, count);
+      subgraphs.push({
+        id: `${label}:${count}`,
+        name: label,
+        nodes: this.#parseSubgraph(m[2]),
+      });
     }
     return subgraphs;
   }
@@ -119,13 +127,13 @@ class SemR {
 
   #validateReferencedAliases(subgraphs) {
     const knownHandles = new Set();
-    for (const [, subgraphNodes] of subgraphs.entries()) {
+    for (const { nodes: subgraphNodes } of subgraphs) {
       for (const [handle] of subgraphNodes) {
         knownHandles.add(handle);
       }
     }
 
-    for (const [, subgraphNodes] of subgraphs.entries()) {
+    for (const { nodes: subgraphNodes } of subgraphs) {
       for (const [, , args] of subgraphNodes) {
         for (const arg of args) {
           if (arg === "_" || this.#isVariable(arg)) {
@@ -160,7 +168,7 @@ class SemR {
 
   toString() {
     const chunks = [];
-    for (const [name, nodes] of this.subgraphs.entries()) {
+    for (const { name, nodes } of this.subgraphs) {
       const serializedNodes = nodes.map(
         ([handle, pred, args]) => `${this.#handlePred(handle, pred)}(${args.join(",")})`,
       );
@@ -180,19 +188,19 @@ class SemR {
     const referencedArgs = new Set();
     const implicitVariableOwners = new Map();
 
-    for (const [name, subgraphNodes] of this.subgraphs.entries()) {
+    for (const { nodes: subgraphNodes } of this.subgraphs) {
       for (const [handle] of subgraphNodes) {
         knownHandles.add(handle);
       }
     }
 
-    for (const [name] of this.subgraphs.entries()) {
+    for (const { id, name } of this.subgraphs) {
       if (name === null) {
         continue;
       }
       nodes.push({
         data: {
-          id: `subgraph:${name}`,
+          id: `subgraph:${id}`,
           label: name,
         },
         classes: "subgraph",
@@ -201,7 +209,7 @@ class SemR {
 
     let edgeIndex = 0;
 
-    for (const [name, subgraphNodes] of this.subgraphs.entries()) {
+    for (const { id, name, nodes: subgraphNodes } of this.subgraphs) {
       let dominant = true;
       for (const [handle, rawPred, args] of subgraphNodes) {
         const nodeClasses = [];
@@ -215,7 +223,7 @@ class SemR {
         };
 
         if (name !== null) {
-          nodeData.parent = `subgraph:${name}`;
+          nodeData.parent = `subgraph:${id}`;
         }
 
         nodes.push({
@@ -229,7 +237,7 @@ class SemR {
             continue;
           }
           if (!knownHandles.has(arg) && this.#isVariable(arg) && !implicitVariableOwners.has(arg)) {
-            implicitVariableOwners.set(arg, name);
+            implicitVariableOwners.set(arg, id);
           }
           referencedArgs.add(arg);
           const edgeData = {
@@ -254,9 +262,9 @@ class SemR {
         id: arg,
         label: arg,
       };
-      const ownerSubgraph = implicitVariableOwners.get(arg);
-      if (ownerSubgraph !== undefined && ownerSubgraph !== null) {
-        argData.parent = `subgraph:${ownerSubgraph}`;
+      const ownerSubgraphId = implicitVariableOwners.get(arg);
+      if (ownerSubgraphId !== undefined && ownerSubgraphId !== null) {
+        argData.parent = `subgraph:${ownerSubgraphId}`;
       }
       nodes.push({ data: argData });
     }

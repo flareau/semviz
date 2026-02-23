@@ -27,4 +27,4 @@ Try converting these formulas:
 - `give_back#I.A.1(n,g,m) & n:neighbour#II(_, m) & g:guitar(m) & m:me#I`
 - `[Th c:cat(j) & j:John & small(c) & black#I.A.2(c)] [Rh s:sleep(c) & well(s) & on(s, cp) & cp:carpet] [Spec think(m, s) & m:me]`
 - `[Spec cause(f1, f2) & f1:fall(c) & c:Carl] [Th j:Jane] [Rh f2:fall(j)]`
-- `[Spec time(d, m) & m:Monday] [Th e:exchange#III.1(s) & s:Shanghai & sg1:singular(e) & definite(e) & r:reopen(e) & after(r, w) & w:weekend & long(w) & sg2:singular(w) & indefinite(w) & past(r)] [Rh d:drop(e) & big(d) & past(d)]`
+- `[Spec time(d, m) & m:Monday] [Th e:exchange#III.1(s) & s:Shanghai & sg1:singular(e) & definite(e) & r:reopen(e) & after(r, w) & w:weekend & long(w) & sg2:singular(w) & indefinite(w) & p1:past(r)] [Rh d:drop(e) & big(d) & p2:past(d)]`

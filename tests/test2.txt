@@ -1,2 +1,2 @@
-[Th chat & petit(chat)] & [Rh dormir(chat) & bien(dormir)]
-[Th chat & petit ( chat ) ]   &  [Rh    dormir(   chat) & bien(dormir)  ]
+[Th c:chat(_) & petit(c)]  [Rh d:dormir(c) & bien(d)]
+[Th c:chat(X) & petit ( c ) ]     [Rh    d:dormir(   c) & bien(d)  ]

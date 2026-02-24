@@ -1,11 +1,10 @@
-  être	(  ceci , test) 	&  présent( être   ) & indéfini(test) & singulier(test)  	
-demander(X, envoyer, Y) & envoyer(Y, dollar) & fils(Y, roi) & 300000(dollar) & préférer(X, Y) & roi(X, Cambodge) & passé_composé(demander) & s1:singulier(fils) & s2:singulier(roi) & d1:défini(roi) & d2:défini(fils) & indéfini(dollar)
-parler(r1, r2) & r1:roi(X, Cambodge) & r2:roi(Y, Espagne)
-vouloir(moi, faire) & faire(moi, structure) & nouveau(structure) & présent(vouloir) & singulier(structure) & indéfini(structure)
-X & relation(X,Y) & réciproque(relation) & c1:causer(relation,aimer) & aimer(X,compagnie) & compagnie(X,Y) & c2:causer(relation,bienveillant) & bienveillant(X,Y) & n1:non(familial) & familial(relation) & n2:non(sexuel) & sexuel(relation) & p1:personne(X) & masculin(p1) & p2:personne(Y)
+  e:être	(  c , t) 	&  présent( e   ) & indéfini(t) & singulier(t) & c:ceci & t:test  	
+de:demander(X, e, Y) & e:envoyer(Y, d) & d:dollar & f:fils(Y, r) & 300000(d) & préférer(X, Y) & r:roi(X, c) & c:Cambodge & passé_composé(d) & s1:singulier(f) & s2:singulier(r) & d1:défini(r) & d2:défini(f) & indéfini(d)
+parler(r1, r2) & r1:roi(X, c) & r2:roi(Y, e) & c:Cambodge & e:Espagne
+v:vouloir(m, f) & f:faire(m, s) & nouveau(s) & présent(v) & singulier(s) & indéfini(s) & s:structure & m:moi
+r:relation(X,Y) & réciproque(r) & c1:causer(r,a) & a:aimer(X,co) & co:compagnie(X,Y) & c2:causer(r,b) & b:bienveillant(X,Y) & n1:non(fam) & fam:familial(r) & n2:non(sex) & sex:sexuel(r) & p1:personne(X) & masculin(p1) & p2:personne(Y)
 peur(X,Y)
-sentiment(X,Y) & intense(sentiment) & relativement(intense) & désagréable(sentiment) & croire(X,dangereux) & dangereux(Y,X) & pousser(sentiment,X,protéger) & protéger(X,X,Y)
+s:sentiment(X,Y) & i:intense(s) & relativement(i) & désagréable(s) & croire(X,d) & d:dangereux(Y,X) & pousser(s,X,p) & p:protéger(X,X,Y)
 accuser#1(X,Y,Z,W)
-déclarer(X,croire,W) & officiel(déclarer) & croire(X,responsable) & responsable(Y,Z) & illégal(Z) & but(X,déclarer,punir#1) & punir#1(W,Y,Z)
+d:déclarer(X,c,W) & officiel(d) & c:croire(X,r) & r:responsable(Y,Z) & illégal(Z) & but(X,d,p) & p:punir#1(W,Y,Z)
 amitié(X,Y)
-relation(X,Y) & réciproque(relation) & c1:causer(relation,aimer) & aimer(X,compagnie) & compagnie(X,Y) & c2:causer(relation,bienveillant) & bienveillant(X,Y) & n1:non(familial) & familial(relation) & n2:non(sexuel) & sexuel(relation)
